@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Classic Motors Showroom - Register System</title>
+<link rel="stylesheet" href="./public/css/style.css">
+</head>
+<body>
+
+<div class="app-layout">
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="dot">CM</div>
+      <div><b>Classic Motors</b><span>Showroom Register</span></div>
+    </div>
+    <button class="side-link active" data-page="home" onclick="goPage('home')"><span class="ic">🏠</span> Dashboard</button>
+    <button class="side-link" data-page="entry" onclick="goPage('entry')"><span class="ic">📝</span> New Entry</button>
+    <button class="side-link" data-page="records" onclick="goPage('records')"><span class="ic">📂</span> Records</button>
+    <button class="side-link" data-page="reports" onclick="goPage('reports')"><span class="ic">📊</span> Reports &amp; Analytics</button>
+    <div class="sidebar-foot">
+      <button class="logout-btn" style="width:100%;" onclick="setLoggedIn(false); window.location.href='login.html'">⏻ Logout</button>
+    </div>
+  </div>
+
+  <div class="main-col">
+    <div class="topbar">
+      <div class="topbar-search">🔍 <input type="text" id="topSearchBox" placeholder="Search records, buyers, CNIC..." oninput="topSearch(this.value)"></div>
+      <div class="topbar-right">
+        <div class="topbar-date" id="topDate"></div>
+        <div class="topbar-user">
+          <div class="avatar">FA</div>
+          <b>Fayyaz786</b>
+        </div>
+      </div>
+    </div>
+
+  <!-- HOME / DASHBOARD PAGE -->
+  <div class="page active" id="page-home">
+    <div class="welcome-line">
+      <h1>Welcome back, Fayyaz Akram! 👋</h1>
+      <p>Here's what's happening in your showroom register today.</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="icon-circle" style="background:#e8f0fe;color:#2a5cd6;">📋</div>
+        <div class="num" id="statTotal">0</div><div class="lbl">Total Records</div>
+        <div class="delta" id="statTotalDelta">All time</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-circle" style="background:#e6f7ec;color:var(--success);">🆕</div>
+        <div class="num" id="statToday">0</div><div class="lbl">Added Today</div>
+        <div class="delta">Since midnight</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-circle" style="background:#fdf3e0;color:#b8860b;">💰</div>
+        <div class="num" id="statAmount">0</div><div class="lbl">Total Sale Amount (Rs.)</div>
+        <div class="delta">Across all records</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-circle" style="background:#fdeaea;color:var(--danger);">⏳</div>
+        <div class="num" id="statPending">0</div><div class="lbl">Pending Balance (Rs.)</div>
+        <div class="delta">Still to be recovered</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-circle" style="background:#f1e9fd;color:#7c3aed;">🏍️</div>
+        <div class="num" id="statModels">0</div><div class="lbl">Unique Models Sold</div>
+        <div class="delta">Distinct entries</div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="chart-card">
+        <h4>📈 Records Added Over Time</h4>
+        <canvas id="chartTrend" height="140"></canvas>
+      </div>
+      <div class="chart-card">
+        <h4>💳 Payment Status</h4>
+        <canvas id="chartPayment" height="140"></canvas>
+        <div id="paymentLegend" style="margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <div class="section-heading">Quick Actions</div>
+    <div class="feature-grid" style="margin-bottom:28px;">
+      <div class="feature-card" onclick="goPage('entry')">
+        <div class="icon">📝</div>
+        <h3>New Entry</h3>
+        <p>Add a new buyer, guarantor, witness, and motorcycle sale record.</p>
+      </div>
+      <div class="feature-card" onclick="goPage('records')">
+        <div class="icon">📂</div>
+        <h3>Browse Records</h3>
+        <p>Search saved entries by buyer name or CNIC number.</p>
+      </div>
+      <div class="feature-card" onclick="goPage('reports')">
+        <div class="icon">📊</div>
+        <h3>Reports &amp; Analytics</h3>
+        <p>View charts and summaries of showroom sales activity.</p>
+      </div>
+      <div class="feature-card" onclick="exportAllJson()">
+        <div class="icon">⬇</div>
+        <h3>Backup Data</h3>
+        <p>Export all records as a JSON file for permanent, portable safekeeping.</p>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h4>🕒 Recent Records</h4>
+      <table class="data-table" id="recentTable">
+        <thead><tr><th>Buyer Name</th><th>Model</th><th>Phone</th><th>Total Amount</th><th>Date Saved</th></tr></thead>
+        <tbody id="recentBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ENTRY FORM PAGE -->
+  <div class="page" id="page-entry">
+    <div class="page-title">Data Entry</div>
+    <div class="page-sub">Add or edit a motorcycle sale record</div>
+
+    <div class="card">
+      <div class="card-title">🏍️ Motorcycle Register — Data Entry</div>
+      <div class="form-grid" style="margin-bottom:8px;">
+        <div class="form-field">
+          <label>Account No. <span class="ur">اکاؤنٹ نمبر</span></label>
+          <input type="text" id="accountNo">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Buyer Details <span class="ur">خریدار کی تفصیلات</span></div>
+      <div class="form-grid">
+        <div class="form-field"><label>Delivery Date <span class="ur">تاریخ ڈیلیوری</span></label><input type="date" id="deliveryDate"></div>
+        <div class="form-field"><label>Father Name <span class="ur">ولدیت</span></label><input type="text" id="buyerFather"></div>
+        <div class="form-field"><label>Buyer Name <span class="ur">نام خریدار</span></label><input type="text" id="buyerName"></div>
+        <div class="form-field"><label>Phone No. <span class="ur">فون نمبر</span></label><input type="text" id="buyerPhone"></div>
+        <div class="form-field"><label>CNIC No. <span class="ur">شناختی کارڈ نمبر</span></label><input type="text" id="buyerCnic"></div>
+        <div class="form-field"><label>Buyer Signature <span class="ur">دستخط خریدار</span></label><input type="text" id="buyerSign"></div>
+        <div class="form-field" style="grid-column:1/-1;"><label>Address <span class="ur">پتہ</span></label><input type="text" id="buyerAddress"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Guarantor Details <span class="ur">ضامن کی تفصیلات</span></div>
+      <div class="form-grid">
+        <div class="form-field"><label>Guarantor Name <span class="ur">نام ضامن</span></label><input type="text" id="guarantorName"></div>
+        <div class="form-field"><label>Father Name <span class="ur">ولدیت</span></label><input type="text" id="guarantorFather"></div>
+        <div class="form-field"><label>Guarantor Signature <span class="ur">دستخط ضامن</span></label><input type="text" id="guarantorSign"></div>
+        <div class="form-field"><label>Phone No. <span class="ur">فون نمبر</span></label><input type="text" id="guarantorPhone"></div>
+        <div class="form-field"><label>CNIC No. <span class="ur">شناختی کارڈ نمبر</span></label><input type="text" id="guarantorCnic"></div>
+        <div class="form-field"><label>Address <span class="ur">پتہ</span></label><input type="text" id="guarantorAddress"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Witness Details <span class="ur">گواہ کی تفصیلات</span></div>
+      <div class="form-grid">
+        <div class="form-field"><label>Witness Name <span class="ur">نام گواہ</span></label><input type="text" id="witnessName"></div>
+        <div class="form-field"><label>Witness Signature <span class="ur">دستخط گواہ</span></label><input type="text" id="witnessSign"></div>
+        <div class="form-field"><label>Phone No. <span class="ur">فون نمبر</span></label><input type="text" id="witnessPhone"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Motorcycle Details <span class="ur">موٹرسائیکل تفصیل</span></div>
+      <div class="form-grid">
+        <div class="form-field"><label>Item Detail <span class="ur">تفصیل آئٹم</span></label><input type="text" id="itemDetail"></div>
+        <div class="form-field"><label>Engine No. <span class="ur">انجن نمبر</span></label><input type="text" id="engineNo"></div>
+        <div class="form-field"><label>Chassis No. <span class="ur">چیسز نمبر</span></label><input type="text" id="chassisNo"></div>
+        <div class="form-field"><label>Registration No. <span class="ur">رجسٹریشن نمبر</span></label><input type="text" id="regNo"></div>
+        <div class="form-field"><label>Model <span class="ur">ماڈل</span></label><input type="text" id="model"></div>
+        <div class="form-field"><label>Color <span class="ur">رنگ</span></label><input type="text" id="color"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Payment Details <span class="ur">رقم کی تفصیل</span></div>
+      <div class="form-grid">
+        <div class="form-field"><label>Total Amount <span class="ur">کل رقم</span></label><input type="number" id="totalAmount"></div>
+        <div class="form-field"><label>Advance <span class="ur">ایڈوانس</span></label><input type="number" id="advanceAmount"></div>
+        <div class="form-field">
+          <label>Remaining Amount <span class="ur">بقایا رقم</span></label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="remainingAmount" style="flex:1;">
+            <button type="button" class="action btn-add" style="padding:9px 12px; font-size:12.5px; white-space:nowrap;" onclick="markFullyPaid()">✅ OK / Fully Paid</button>
+          </div>
+        </div>
+        <div class="form-field" style="grid-column:1/-1;"><label>Remarks <span class="ur">ریمارکس</span></label><input type="text" id="remarks"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Installment Records <span class="ur">قسطوں کا ریکارڈ</span></div>
+      <table class="installments" id="installTable">
+        <thead>
+          <tr><th>Sr.#</th><th>Date</th><th>Total</th><th>Received</th><th>Remaining</th><th>Received By (Sign)</th><th>Detail</th><th>Del</th></tr>
+        </thead>
+        <tbody id="installBody"></tbody>
+      </table>
+      <div class="btn-row">
+        <button class="action btn-add" onclick="addInstallmentRow()">+ Add Installment Row</button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="action btn-primary" onclick="saveRecord()">💾 Save Record</button>
+      <button class="action btn-gold" onclick="downloadPdf()">⬇ Download PDF</button>
+      <button class="action btn-outline" onclick="newRecord()">🆕 New Form</button>
+    </div>
+  </div>
+
+  <!-- RECORDS PAGE -->
+  <div class="page" id="page-records">
+    <div class="page-title">Records Management</div>
+    <div class="page-sub">Manage and monitor showroom sale records</div>
+    <div class="search-bar">
+      <input type="text" id="searchBox" placeholder="Search by buyer name or CNIC number..." oninput="recordsPage=1; renderList()">
+      <button class="action btn-outline" onclick="document.getElementById('importFile').click()">📂 Import JSON</button>
+      <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importJson(event)">
+      <button class="action btn-gold" onclick="exportAllJson()">⬇ Export / Backup JSON</button>
+    </div>
+    <div id="recordsList"></div>
+  </div>
+
+  <!-- REPORTS PAGE -->
+  <div class="page" id="page-reports">
+    <div class="page-title">Reports &amp; Analytics</div>
+    <div class="page-sub">Generate and review showroom performance summaries</div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="icon-circle" style="background:#e8f0fe;color:#2a5cd6;">📋</div><div class="num" id="rTotal">0</div><div class="lbl">Total Records</div></div>
+      <div class="stat-card"><div class="icon-circle" style="background:#e6f7ec;color:var(--success);">✅</div><div class="num" id="rFullyPaid">0</div><div class="lbl">Fully Paid</div></div>
+      <div class="stat-card"><div class="icon-circle" style="background:#fdf3e0;color:#b8860b;">⏳</div><div class="num" id="rPartial">0</div><div class="lbl">Installments Pending</div></div>
+      <div class="stat-card"><div class="icon-circle" style="background:#f1e9fd;color:#7c3aed;">💰</div><div class="num" id="rAvgSale">0</div><div class="lbl">Average Sale Amount (Rs.)</div></div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="chart-card">
+        <h4>Top Item Detail Sold</h4>
+        <canvas id="chartModels" height="150"></canvas>
+      </div>
+      <div class="chart-card">
+        <h4>📊 Sales vs Pending by Record</h4>
+        <canvas id="chartSalesPending" height="150"></canvas>
+      </div>
+    </div>
+
+<!-- Dropdown Filter -->
+<div style="display:flex; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap;">
+  <label style="font-size:13px; font-weight:600; color:var(--navy);">📋 Filter Records:</label>
+  <select 
+    id="reportFilterDropdown" 
+    onchange="setReportFilter(this.value)"
+    style="
+      padding:10px 16px;
+      border-radius:9px;
+      border:1.5px solid #ddd;
+      font-family:inherit;
+      font-size:14px;
+      font-weight:600;
+      color:var(--navy);
+      background:#fff;
+      cursor:pointer;
+      outline:none;
+      min-width:200px;
+      box-shadow:0 2px 8px rgba(0,0,0,.06);
+    "
+  >
+    <option value="all">📋 All Records</option>
+    <option value="paid">✅ Fully Paid</option>
+    <option value="pending">⏳ Pending</option>
+  </select>
+
+  <!-- Record Count Badge -->
+  <span id="filterCountBadge" style="
+    background:var(--navy);
+    color:#fff;
+    padding:6px 14px;
+    border-radius:20px;
+    font-size:12.5px;
+    font-weight:600;
+  ">Total: 0</span>
+</div>
+
+<!-- Fully Paid Table -->
+<div class="chart-card" id="paidTableCard">
+  <h4>✅ Fully Paid Records</h4>
+  <div style="overflow-x:auto;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Buyer Name</th>
+          <th>Item Detail</th>
+          <th>Total Amount</th>
+          <th>Advance</th>
+          <th>Remaining</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="paidTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Pending Table -->
+<div class="chart-card" id="pendingTableCard" style="margin-top:20px;">
+  <h4>⏳ Pending Records</h4>
+  <div style="overflow-x:auto;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Buyer Name</th>
+          <th>Item Detail</th>
+          <th>Total Amount</th>
+          <th>Advance</th>
+          <th>Remaining</th>
+          <th>Time / Installment</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="pendingTableBody"></tbody>
+    </table>
+  </div>
+</div>
+  </div>
+
+  </div>
+</div>
+
+<!-- ============ RE-AUTH MODAL (required before editing a record) ============ -->
+<div class="modal-overlay" id="reauthModal">
+  <div class="modal-box">
+  <h3 id="reauthTitle">✏️ Confirm Login to Edit</h3>
+<p id="reauthSubtitle">Please re-enter your credentials to continue.</p>
+    <div class="login-field">
+      <label>Username</label>
+      <input type="text" id="reauthUser">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="reauthPass" onkeydown="if(event.key==='Enter') confirmReauth()">
+    </div>
+    <div class="login-error" id="reauthError"></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="cancelReauth()">Cancel</button>
+      <button class="modal-confirm" onclick="confirmReauth()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PRINT-ONLY TEMPLATE (Urdu only, single page) ============ -->
+<div id="printSheet">
+  <div class="ps-page">
+    <div class="ps-topline">
+      <div class="ps-acct">اکاؤنٹ نمبر: <b id="p_accountNo"></b></div>
+      <div class="ps-brand">کلاسک موٹرز شوروم
+        <small>چیک نمبر 6-5 ایم ایل پپلاں</small>
+      </div>
+      <div>
+        <div class="ps-phone">0307-5228964</div>
+        <div class="ps-owner">فیاض اکرم</div>
+      </div>
+    </div>
+
+    <div class="ps-multi">
+      <div class="ps-line"><span class="lbl">تاریخ ڈیلیوری:</span><span class="val" id="p_deliveryDate"></span></div>
+      <div class="ps-line"><span class="lbl">ولدیت:</span><span class="val" id="p_buyerFather"></span></div>
+    </div>
+    <div class="ps-line"><span class="lbl">نام خریدار:</span><span class="val" id="p_buyerName"></span></div>
+    <div class="ps-line"><span class="lbl">فون نمبر:</span><span class="val" id="p_buyerPhone"></span></div>
+    <div class="ps-line"><span class="lbl">شناختی کارڈ نمبر:</span><span class="val" id="p_buyerCnic"></span></div>
+    <div class="ps-line"><span class="lbl">دستخط خریدار:</span><span class="val" id="p_buyerSign"></span></div>
+    <div class="ps-line"><span class="lbl">پتہ:</span><span class="val" id="p_buyerAddress"></span></div>
+
+    <div class="ps-multi">
+      <div class="ps-line"><span class="lbl">ضامن:</span><span class="val" id="p_guarantorName"></span></div>
+      <div class="ps-line"><span class="lbl">ولدیت:</span><span class="val" id="p_guarantorFather"></span></div>
+      <div class="ps-line"><span class="lbl">دستخط ضامن:</span><span class="val" id="p_guarantorSign"></span></div>
+    </div>
+    <div class="ps-line"><span class="lbl">فون نمبر:</span><span class="val" id="p_guarantorPhone"></span></div>
+    <div class="ps-line"><span class="lbl">شناختی کارڈ نمبر:</span><span class="val" id="p_guarantorCnic"></span></div>
+    <div class="ps-line"><span class="lbl">پتہ:</span><span class="val" id="p_guarantorAddress"></span></div>
+
+    <div class="ps-multi">
+      <div class="ps-line"><span class="lbl">نام گواہ:</span><span class="val" id="p_witnessName"></span></div>
+      <div class="ps-line"><span class="lbl">دستخط گواہ:</span><span class="val" id="p_witnessSign"></span></div>
+    </div>
+    <div class="ps-line"><span class="lbl">فون نمبر:</span><span class="val" id="p_witnessPhone"></span></div>
+
+    <div class="ps-multi">
+      <div class="ps-line"><span class="lbl">تفصیل آئٹم:</span><span class="val" id="p_itemDetail"></span></div>
+      <div class="ps-line"><span class="lbl">انجن نمبر:</span><span class="val" id="p_engineNo"></span></div>
+      <div class="ps-line"><span class="lbl">چیسز نمبر:</span><span class="val" id="p_chassisNo"></span></div>
+    </div>
+    <div class="ps-multi">
+      <div class="ps-line"><span class="lbl">رجسٹریشن نمبر:</span><span class="val" id="p_regNo"></span></div>
+      <div class="ps-line"><span class="lbl">ماڈل:</span><span class="val" id="p_model"></span></div>
+      <div class="ps-line"><span class="lbl">رنگ:</span><span class="val" id="p_color"></span></div>
+    </div>
+    <div class="ps-multi">
+      <div class="ps-line"><span class="lbl">کل رقم:</span><span class="val" id="p_totalAmount"></span></div>
+      <div class="ps-line"><span class="lbl">ایڈوانس:</span><span class="val" id="p_advanceAmount"></span></div>
+      <div class="ps-line"><span class="lbl">بقایا رقم:</span><span class="val" id="p_remainingAmount"></span></div>
+    </div>
+    <div class="ps-line"><span class="lbl">ریمارکس:</span><span class="val" id="p_remarks"></span></div>
+
+    <table class="ps-table">
+      <thead>
+        <tr><th>سیریل نمبر</th><th>تاریخ</th><th>کل رقم</th><th>وصول رقم</th><th>بقایا رقم</th><th>دستخط وصول کنندہ</th><th>تفصیل</th></tr>
+      </thead>
+      <tbody id="p_installBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="./public/js/auth.js"></script>
+<script src="./public/js/app.js"></script>
+<script>initApp();</script>
+</body>
+</html>

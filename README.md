@@ -34,8 +34,8 @@ classic-motors-app/
 1. Download or clone this repository.
 2. Open `public/login.html` in a browser (or serve the `public` folder with any local static server, e.g. VS Code "Live Server").
 3. Sign in with:
-   - **Username:** `admin`
-   - **Password:** `1122`
+   - **Username:** `Fayaz786`
+   - **Password:** `Fayaz@964`
 
 ## ⚠️ Important Notes
 

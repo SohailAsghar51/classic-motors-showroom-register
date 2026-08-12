@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login - Classic Motors Showroom</title>
+<link rel="stylesheet" href="./public/css/style.css">
+</head>
+<body>
+<div id="loginPage">
+  <div class="login-card">
+    <div class="login-logo">CM</div>
+    <h2>Classic Motors Showroom</h2>
+    <p class="sub">Sign in to access the register system</p>
+    <div class="login-field">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="Enter username" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="loginError"></div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:18px;font-size:11.5px;color:#14b8a6;font-weight:600;">
+      🔒 Secure Access Portal
+    </div>
+    <div class="login-foot">© Classic Motors Showroom · Chak 6-5 M.L Pipplan</div>
+  </div>
+</div>
+
+<script src="./public/js/auth.js"></script>
+<script>
+  // If already logged in, go straight to the app
+  if(isLoggedIn()){ window.location.href = 'index.html'; }
+
+  function doLogin(){
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value;
+    const err = document.getElementById('loginError');
+    if(checkCredentials(u, p)){
+      err.textContent = '';
+      setLoggedIn(true);
+      window.location.href = 'index.html';
+    } else {
+      err.textContent = 'Invalid username or password. Please try again.';
+    }
+  }
+</script>
+</body>
+</html>
